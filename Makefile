@@ -4,6 +4,7 @@ COMPOSE = docker compose -f docker/docker-compose.yml
 
 .PHONY: check-docker
 .PHONY: artisan
+.PHONY: composer
 
 # Docker
 up:
@@ -27,5 +28,25 @@ check-docker:
 restart: down up
 
 # Composer
+
+composer:
+	$(EXEC_PHP) composer $(filter-out $@,$(MAKECMDGOALS))
+
+composer-req:
+	$(EXEC_PHP) composer require $(filter-out $@,$(MAKECMDGOALS))
+
 composer-install:
-	$(EXEC_PHP) composer install
+	$(EXEC_PHP) composer install $(filter-out $@,$(MAKECMDGOALS))
+
+
+
+# Envia e-mail de teste
+test-email:
+	$(EXEC_PHP) php test-email.php
+
+logs:
+	docker logs -f mini-erp-php
+	
+# Evita erro para comandos extras (ex.: dump-autoload)
+%:
+	@:

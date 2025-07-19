@@ -3,11 +3,15 @@
     "description": "Mini ERP em PHP",
     "type": "project",
     "require": {
-        "php": "^8.3"
+        "php": "^8.3",
+        "phpmailer/phpmailer": "^6.10"
     },
     "autoload": {
         "psr-4": {
             "App\\": "app/"
-        }
+        },
+        "files": [
+            "config/bootstrap.php"
+        ]
     }
 }

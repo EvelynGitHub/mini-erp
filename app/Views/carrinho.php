@@ -25,6 +25,7 @@
                     <th>Quantidade</th>
                     <th>Subtotal</th>
                     <th>Status</th>
+                    <th>Ação</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,6 +41,10 @@
                             <?php else: ?>
                                 <span class="text-success">OK</span>
                             <?php endif; ?>
+                        </td>
+                        <td>
+                            <a href="/index.php?page=carrinho&action=remove&id=<?= $pid ?>"
+                                class="btn btn-danger btn-sm">Remover</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -60,25 +65,35 @@
                     <label>Email para contato</label>
                     <input type="email" name="email" class="form-control" required>
                 </div>
-                <div class="mb-3">
+                <div class="input-group mb-3">
                     <label>CEP</label>
-                    <input name="cep" id="cep" class="form-control" />
+                    <div class="input-group mb-3">
+                        <input name="cep" id="cep" class="form-control" aria-describedby="btnCep">
+                        <button id="btnCep" class="btn btn-success btn-sm" type="button">Pesquisar</button>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label>Endereço de entrega</label>
                     <textarea name="endereco" id="endereco" class="form-control" required></textarea>
                 </div>
                 <h4>Aplicar Cupom</h4>
-                <div class="mb-3">
-                    <input type="text" id="codigoCupom" placeholder="Digite o código" class="form-control inline-block">
-                    <button id="btnCupom" class="btn btn-success btn-sm">Aplicar</button>
+                <div class="input-group mb-3">
+                    <input type="text" id="codigoCupom" placeholder="Digite o código" class="form-control"
+                        aria-describedby="btnCupom">
+                    <button id="btnCupom" class="btn btn-success btn-sm" type="button">Aplicar</button>
                 </div>
                 <p id="msgCupom" style="color: red;"></p>
-                <button class="btn btn-success">Finalizar Compra</button>
+
+
+                <div class="input-group mb-3">
+                    <button class="btn btn-success">Finalizar Compra</button>
+                </div>
+
             </form>
         <?php endif; ?>
 
     <?php endif; ?>
+
     <a href="/index.php?page=produtos" class="btn btn-secondary mt-3">Continuar Comprando</a>
 
     <script src="../js/jquery.min.js"></script>
@@ -102,12 +117,16 @@
         });
 
         // Consulta CEP com ViaCEP
-        $("#cep").on('blur', function () {
-            const cep = $(this).val().replace(/\D/g, '');
+        // $("#cep").on('blur', function () {
+        //      const cep = $(this).val().replace(/\D/g, '');
+        $("#btnCep").on('click', function () {
+            const cep = $("#cep").val().replace(/\D/g, '');
             if (cep.length === 8) {
                 $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function (data) {
                     if (!data.erro) {
-                        $("#endereco").val(`${data.logradouro}, ${data.bairro}, ${data.localidade}-${data.uf}`);
+                        console.log(data);
+
+                        $("#endereco").val(`${data.logradouro}, nº , ${data.bairro}, ${data.localidade}-${data.uf}`);
                     } else {
                         alert("CEP não encontrado.");
                     }

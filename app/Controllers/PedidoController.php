@@ -6,6 +6,9 @@ use App\Models\Pedido;
 use App\Models\PedidoItem;
 use App\Models\Estoque;
 use App\Models\Produto;
+use App\Services\JobRunner;
+use App\Services\EmailService;
+
 use PDO;
 
 class PedidoController
@@ -57,6 +60,24 @@ class PedidoController
         }
 
         $_SESSION['carrinho'][$produtoId]['quantidade'] += $quantidade;
+
+        header("Location: /index.php?page=carrinho");
+        exit;
+    }
+
+
+    /**
+     * Remoove produto do carrinho
+     */
+    public function remove(int $produtoId): void
+    {
+        $produto = $this->produtoModel->find($produtoId);
+        if (!$produto) {
+            echo "Produto não encontrado";
+            return;
+        }
+
+        unset($_SESSION['carrinho'][$produtoId]);
 
         header("Location: /index.php?page=carrinho");
         exit;
@@ -160,14 +181,11 @@ class PedidoController
      */
     private function enviarEmailAsync(int $pedidoId, string $email, string $endereco, float $total): void
     {
-        $cmd = sprintf(
-            'php %s/app/jobs/send_email.php %d %s %s %f > /dev/null 2>&1 &',
-            __DIR__ . '/../..',
+        JobRunner::dispatch(EmailService::class, 'enviarPedido', [
             $pedidoId,
-            escapeshellarg($email),
-            escapeshellarg($endereco),
+            $email,
+            $endereco,
             $total
-        );
-        exec($cmd);
+        ]);
     }
 }
