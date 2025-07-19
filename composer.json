@@ -1,0 +1,13 @@
+{
+    "name": "evelyn/mini-erp",
+    "description": "Mini ERP em PHP",
+    "type": "project",
+    "require": {
+        "php": "^8.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

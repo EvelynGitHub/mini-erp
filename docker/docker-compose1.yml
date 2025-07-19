@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  php:
+    image: php:8.1-apache
+    container_name: mini-erp-php
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./app:/var/www/html/app
+      - ./config:/var/www/html/config
+      - ./vendor:/var/www/html/vendor
+      - ./composer.json:/var/www/html/composer.json
+    depends_on:
+      - db
+    working_dir: /var/www/html
+    command: bash -c "docker-php-ext-install pdo pdo_mysql && apache2-foreground"
+
+  db:
+    image: mysql:8.0
+    container_name: mini-erp-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mini_erp
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    container_name: mini-erp-adminer
+    restart: always
+    ports:
+      - "8081:8080"
+
+volumes:
+  db_data:
