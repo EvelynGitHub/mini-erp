@@ -11,6 +11,9 @@ services:
       # - ./vendor:/var/www/html/vendor
       # - ./composer.json:/var/www/html/composer.json
       - ../:/var/www/html
+    # FALTOU A LINHA ABAIXO PARA PODER FUNCIONAR O XDEBUG NA APLICACAO
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8080:80"
     depends_on:
