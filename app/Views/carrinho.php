@@ -1,7 +1,3 @@
-<?php
-
-
-?>
 <!DOCTYPE html>
 <html>
 
@@ -43,7 +39,7 @@
                             <?php endif; ?>
                         </td>
                         <td>
-                            <a href="/index.php?page=carrinho&action=remove&id=<?= $pid ?>"
+                            <a href="/index.php?page=carrinho&action=remove&id=<?= $item['produto_id'] ?>&variacao=<?= $item['variacao_id'] ?>"
                                 class="btn btn-danger btn-sm">Remover</a>
                         </td>
                     </tr>

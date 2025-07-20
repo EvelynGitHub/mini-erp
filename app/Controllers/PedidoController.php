@@ -35,7 +35,7 @@ class PedidoController
     /**
      * Adiciona produto ao carrinho
      */
-    public function add(int $produtoId, int $quantidade = 1): void
+    public function add(int $produtoId, int $variacaoId, int $quantidade = 1): void
     {
         $produto = $this->produtoModel->find($produtoId);
         if (!$produto) {
@@ -44,22 +44,24 @@ class PedidoController
         }
 
         // Verifica se tem estoque
-        $estoqueAtual = $this->estoqueModel->getQuantidade($produtoId);
-        if ($estoqueAtual <= 0) {
+        $estoqueAtual = $this->estoqueModel->getQuantidadePreco($produtoId, $variacaoId);
+        if ($estoqueAtual['quantidade'] <= 0) {
             echo "Produto sem estoque disponível.";
             return;
         }
 
         // Atualiza carrinho
-        if (!isset($_SESSION['carrinho'][$produtoId])) {
-            $_SESSION['carrinho'][$produtoId] = [
+        if (!isset($_SESSION['carrinho']["$produtoId+$variacaoId"])) {
+            $_SESSION['carrinho']["$produtoId+$variacaoId"] = [
                 'quantidade' => 0,
-                'preco' => (float) $produto['preco'],
-                'nome' => $produto['nome']
+                'preco' => (float) $estoqueAtual['preco'],
+                'nome' => $produto['nome'],
+                'variacao_id' => $variacaoId,
+                'produto_id' => $produtoId
             ];
         }
 
-        $_SESSION['carrinho'][$produtoId]['quantidade'] += $quantidade;
+        $_SESSION['carrinho']["$produtoId+$variacaoId"]['quantidade'] += $quantidade;
 
         header("Location: /index.php?page=carrinho");
         exit;
@@ -69,7 +71,7 @@ class PedidoController
     /**
      * Remoove produto do carrinho
      */
-    public function remove(int $produtoId): void
+    public function remove(int $produtoId, int $variacaoId): void
     {
         $produto = $this->produtoModel->find($produtoId);
         if (!$produto) {
@@ -77,7 +79,7 @@ class PedidoController
             return;
         }
 
-        unset($_SESSION['carrinho'][$produtoId]);
+        unset($_SESSION['carrinho']["$produtoId+$variacaoId"]);
 
         header("Location: /index.php?page=carrinho");
         exit;
@@ -98,13 +100,13 @@ class PedidoController
 
         // Valida estoque (alerta visual apenas)
         $errosEstoque = [];
-        foreach ($carrinho as $pid => $item) {
-            $stmt = $this->pdo->prepare("SELECT quantidade FROM estoque WHERE produto_id = ?");
-            $stmt->execute([$pid]);
+        foreach ($carrinho as $p_id_va => $item) {
+            $stmt = $this->pdo->prepare("SELECT quantidade FROM estoque WHERE produto_id = ? AND grupo_id = ?");
+            $stmt->execute([$item['produto_id'], $item['variacao_id']]);
             $qtdEstoque = (int) $stmt->fetchColumn();
 
             if ($qtdEstoque < $item['quantidade']) {
-                $errosEstoque[$pid] = "Estoque insuficiente (Disponível: {$qtdEstoque})";
+                $errosEstoque[$item['produto_id']][$item['variacao_id']] = "Estoque insuficiente (Disponível: {$qtdEstoque})";
             }
         }
 
@@ -123,8 +125,8 @@ class PedidoController
         }
 
         // Valida estoque de todos os itens antes de processar
-        foreach ($carrinho as $pid => $item) {
-            $qtdEstoque = $this->estoqueModel->getQuantidade($pid);
+        foreach ($carrinho as $p_id_va => $item) {
+            $qtdEstoque = $this->estoqueModel->getQuantidadePreco($item['produto_id'], $item['variacao_id']);
             if ($qtdEstoque < $item['quantidade']) {
                 echo "Estoque insuficiente para o produto: {$item['nome']} (Disponível: $qtdEstoque)";
                 return;
@@ -149,9 +151,19 @@ class PedidoController
         );
 
         // Salva itens e decrementa estoque
-        foreach ($carrinho as $pid => $item) {
-            $this->pedidoItemModel->adicionarItem($pedidoId, $pid, $item['quantidade'], $item['preco']);
-            $this->estoqueModel->decrementar($pid, $item['quantidade']);
+        foreach ($carrinho as $p_id_va => $item) {
+            $this->pedidoItemModel->adicionarItem(
+                $pedidoId,
+                $item['produto_id'],
+                $item['variacao_id'],
+                $item['quantidade'],
+                $item['preco']
+            );
+            $this->estoqueModel->decrementar(
+                $item['produto_id'],
+                $item['variacao_id'],
+                $item['quantidade']
+            );
         }
 
         // Dispara e-mail em background

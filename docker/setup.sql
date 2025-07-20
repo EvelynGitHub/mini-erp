@@ -1,61 +1,107 @@
-CREATE DATABASE IF NOT EXISTS mini_erp;
+-- Configuração inicial
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+CREATE DATABASE IF NOT EXISTS mini_erp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE mini_erp;
+-- Produtos (não dependem de variações diretamente)
 CREATE TABLE produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
-    preco DECIMAL(10, 2) NOT NULL,
+    ativo TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+-- Grupos de variações (ex.: "Cor", "Tamanho", "Preto+M")
+CREATE TABLE grupos_variacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+-- Variações (ex.: "Preto", "Branco", "P", "M")
+CREATE TABLE variacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+-- Relação Grupo ↔ Variações (muitos para muitos)
+CREATE TABLE grupo_variacao_variacao (
+    grupo_id INT NOT NULL,
+    variacao_id INT NOT NULL,
+    PRIMARY KEY (grupo_id, variacao_id),
+    FOREIGN KEY (grupo_id) REFERENCES grupos_variacoes(id) ON DELETE CASCADE,
+    FOREIGN KEY (variacao_id) REFERENCES variacoes(id) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+-- Estoque: vincula produto e (opcionalmente) um grupo de variação
 CREATE TABLE estoque (
     id INT AUTO_INCREMENT PRIMARY KEY,
     produto_id INT NOT NULL,
-    variacao VARCHAR(255) NULL,
-    quantidade INT DEFAULT 0,
-    FOREIGN KEY (produto_id) REFERENCES produtos (id) ON DELETE CASCADE
-);
+    grupo_id INT NULL,
+    quantidade INT NOT NULL DEFAULT 0,
+    preco DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    UNIQUE (produto_id, grupo_id),
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    FOREIGN KEY (grupo_id) REFERENCES grupos_variacoes(id) ON DELETE
+    SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+-- Pedidos: dados de clientes podem ir para outra tabela posteriormente
 CREATE TABLE pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     subtotal DECIMAL(10, 2),
     frete DECIMAL(10, 2),
-    total DECIMAL(10, 2),
+    total DECIMAL(10, 2) NOT NULL,
     status ENUM ('pendente', 'pago', 'enviado', 'cancelado') DEFAULT 'pendente',
     cliente_email VARCHAR(255),
     cliente_endereco TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TABLE cupons (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    codigo VARCHAR(50) UNIQUE,
-    desconto_percentual DECIMAL(5, 2),
-    valor_minimo DECIMAL(10, 2),
-    validade DATE,
-    ativo TINYINT (1) DEFAULT 1
-);
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+-- Itens dos pedidos
 CREATE TABLE pedido_itens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     pedido_id INT NOT NULL,
     produto_id INT NOT NULL,
+    grupo_id INT NULL,
     quantidade INT NOT NULL,
     preco_unitario DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (pedido_id) REFERENCES pedidos (id),
-    FOREIGN KEY (produto_id) REFERENCES produtos (id)
-);
+    FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
+    FOREIGN KEY (grupo_id) REFERENCES grupos_variacoes(id) ON DELETE
+    SET NULL
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+-- Cupons
+CREATE TABLE cupons (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(50) NOT NULL UNIQUE,
+    desconto_percentual DECIMAL(5, 2) NOT NULL,
+    valor_minimo DECIMAL(10, 2) DEFAULT 0.00,
+    validade DATE,
+    ativo TINYINT (1) DEFAULT 1
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- SEEDS
 -- Produtos e Estoque
-INSERT INTO produtos (nome, preco)
-VALUES ('Camiseta Básica', 49.90),
-    ('Calça Jeans', 159.90),
-    ('Tênis Esportivo', 249.90),
-    ('Boné Trucker', 39.90);
-INSERT INTO estoque (produto_id, variacao, quantidade)
-VALUES (1, 'P', 10),
-    (1, 'M', 8),
-    (1, 'G', 5),
-    (2, '38', 6),
-    (2, '40', 4),
-    (3, '41', 7),
-    (3, '42', 6),
-    (4, NULL, 15);
+-- Inserts iniciais (Produtos, Grupos e Variações)
+INSERT INTO produtos (nome)
+VALUES ('Camiseta Básica'),
+    ('Tênis Esportivo');
+INSERT INTO grupos_variacoes (nome)
+VALUES ('Cor: Preto'),
+    ('Tamanho: 38');
+INSERT INTO variacoes (nome)
+VALUES ('Preto'),
+    ('Branco'),
+    ('P'),
+    ('M'),
+    ('38');
+-- Relacionando variações aos grupos
+INSERT INTO grupo_variacao_variacao (grupo_id, variacao_id)
+VALUES (1, 1),
+    -- Cor: Preto
+    (2, 5);
+-- Tamanho: 38
+-- Estoque com preço (Produto + Grupo de Variação)
+INSERT INTO estoque (produto_id, grupo_id, quantidade, preco)
+VALUES (1, 1, 10, 59.90),
+    -- Camiseta Básica - Cor: Preto
+    (2, NULL, 8, 199.00),
+    -- Tênis Esportivo (sem variação)
+    (2, 2, 8, 199.00);
+-- Tênis Esportivo (com variação)
 -- Cupons
 INSERT INTO cupons (
         codigo,

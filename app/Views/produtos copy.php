@@ -155,123 +155,53 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark mb-5">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.php">Mini-ERP</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="?page=variacao">Variações</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="?page=carrinho">
-                            Carrinho
-                            <span class="badge rounded-pill bg-danger">
-                                <?= count($_SESSION["carrinho"]) ?>
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            <a class="navbar-brand" href="#">Gerenciamento de Produtos ERP</a>
         </div>
     </nav>
 
-    <div class="container-fluid py-4 container-md ">
+    <div class="container-fluid py-4 container-md">
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <div class="row">
-                    <!-- Card para Cadastrar Novo Produto -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                Cadastrar Novo Produto
-                            </div>
-                            <div class="card-body">
-                                <form id="formCadastrarProduto">
-                                    <div class="mb-3">
-                                        <label for="nomeProduto" class="form-label">Nome do Produto</label>
-                                        <input type="text" class="form-control" id="nomeProduto"
-                                            placeholder="Ex: Camiseta Básica" required>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="precoProduto" class="form-label">Preço</label>
-                                            <input type="number" step="0.01" class="form-control" id="precoProduto"
-                                                placeholder="Ex: 59.90" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="quantidadeProduto" class="form-label">Quantidade em
-                                                Estoque</label>
-                                            <input type="number" class="form-control" id="quantidadeProduto"
-                                                placeholder="Ex: 10" required>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="grupoVariacaoProduto" class="form-label">Grupo de Variação / SKU
-                                            (Opcional)</label>
-                                        <select class="form-select" id="grupoVariacaoProduto">
-                                            <option value="">Nenhum</option>
-                                            <?php foreach ($gruposVariacoes as $grupo): ?>
-                                                <option value="<?= $grupo['id'] ?>"><?= $grupo['nome'] ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">Criar Produto e Estoque</button>
-                                </form>
-                                <div id="alertaProduto" class="alert mt-3 d-none" role="alert"></div>
-                            </div>
-                        </div>
+                <!-- Card para Cadastrar Produto -->
+                <div class="card mb-4 ">
+                    <div class="card-header">
+                        Cadastrar Novo Produto
                     </div>
+                    <div class="card-body">
+                        <form id="formCadastrarProduto">
+                            <div class="mb-3">
+                                <label for="nomeProduto" class="form-label">Nome do Produto</label>
+                                <input type="text" class="form-control" id="nomeProduto"
+                                    placeholder="Ex: Camiseta Básica" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="precoProduto" class="form-label">Preço</label>
+                                    <input type="number" step="0.01" class="form-control" id="precoProduto"
+                                        placeholder="Ex: 59.90" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="quantidadeProduto" class="form-label">Quantidade em Estoque</label>
+                                    <input type="number" class="form-control" id="quantidadeProduto"
+                                        placeholder="Ex: 10" required>
+                                </div>
+                            </div>
 
-                    <!-- Card para Adicionar Estoque para Produto Existente -->
-                    <div class="col-md-6 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                Adicionar Estoque para Produto Existente
+                            <div class="mb-3">
+                                <label for="grupoVariacaoProduto" class="form-label">Grupo de Variação
+                                    (Opcional)</label>
+                                <select class="form-select" id="grupoVariacaoProduto">
+                                    <option value="">Nenhum</option>
+                                    <!-- Grupos de variações serão carregados aqui via JS ou PHP -->
+                                    <?php foreach ($gruposVariacoes as $grupo): ?>
+                                        <option value="<?= $grupo['id'] ?>"><?= $grupo['nome'] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
-                            <div class="card-body">
-                                <form id="formAdicionarEstoque">
-                                    <div class="mb-3">
-                                        <label for="selectProdutoExistente" class="form-label">Selecionar
-                                            Produto</label>
-                                        <select class="form-select" id="selectProdutoExistente" required>
-                                            <option value="">Selecione um produto</option>
-                                            <?php foreach ($produtosSimples as $prod): ?>
-                                                <option value="<?= $prod['id'] ?>"><?= $prod['nome'] ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="selectGrupoVariacaoEstoque" class="form-label">Selecionar Grupo de
-                                            Variação / SKU</label>
-                                        <select class="form-select" id="selectGrupoVariacaoEstoque" required>
-                                            <option value="">Selecione um SKU</option>
-                                            <?php foreach ($gruposVariacoes as $grupo): ?>
-                                                <option value="<?= $grupo['id'] ?>"><?= $grupo['nome'] ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="precoEstoqueExistente" class="form-label">Preço</label>
-                                            <input type="number" step="0.01" class="form-control"
-                                                id="precoEstoqueExistente" placeholder="Ex: 59.90" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="quantidadeEstoqueExistente" class="form-label">Quantidade em
-                                                Estoque</label>
-                                            <input type="number" class="form-control" id="quantidadeEstoqueExistente"
-                                                placeholder="Ex: 10" required>
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">Adicionar Estoque</button>
-                                </form>
-                                <div id="alertaAdicionarEstoque" class="alert mt-3 d-none" role="alert"></div>
-                            </div>
-                        </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Adicionar Produto</button>
+                        </form>
+                        <div id="alertaProduto" class="alert mt-3 d-none" role="alert"></div>
                     </div>
                 </div>
 
@@ -287,7 +217,7 @@
                                     <tr>
                                         <th scope="col">ID Produto</th>
                                         <th scope="col">Nome Produto</th>
-                                        <th scope="col">Grupo Variação / SKU</th>
+                                        <th scope="col">Grupo Variação</th>
                                         <th scope="col">Preço</th>
                                         <th scope="col">Estoque</th>
                                         <th scope="col">Ações</th>
@@ -303,7 +233,7 @@
                                             <tr>
                                                 <td><?= $p['produto_id'] ?></td>
                                                 <td><?= $p['produto_nome'] ?></td>
-                                                <td><?= $p['grupo_nome'] ?? 'N/A (Sem SKU)' ?></td>
+                                                <td><?= $p['grupo_nome'] ?? 'N/A (Sem Variação)' ?></td>
                                                 <td>R$ <?= number_format($p['preco'], 2, ',', '.') ?></td>
                                                 <td><?= $p['quantidade'] ?></td>
                                                 <td>
@@ -314,20 +244,16 @@
                                                         data-nome-produto="<?= $p['produto_nome'] ?>"
                                                         data-preco="<?= $p['preco'] ?>"
                                                         data-quantidade="<?= $p['quantidade'] ?>"
-                                                        data-nome-grupo="<?= $p['grupo_nome'] ?? 'N/A (Sem SKU)' ?>">
+                                                        data-nome-grupo="<?= $p['grupo_nome'] ?? 'N/A (Sem Variação)' ?>">
                                                         Editar
                                                     </button>
                                                     <button class="btn btn-danger btn-sm btn-excluir-produto"
                                                         data-produto-id="<?= $p['produto_id'] ?>"
                                                         data-estoque-id="<?= $p['estoque_id'] ?>"
                                                         data-nome-produto="<?= $p['produto_nome'] ?>"
-                                                        data-nome-grupo="<?= $p['grupo_nome'] ?? 'N/A (Sem SKU)' ?>">
+                                                        data-nome-grupo="<?= $p['grupo_nome'] ?? 'N/A (Sem Variação)' ?>">
                                                         Excluir
                                                     </button>
-                                                    <a class="btn btn-primary"
-                                                        href="?page=carrinho&action=add&id=<?= $p['produto_id'] ?>&variacao=<?= $p['grupo_id'] ?? '' ?>">
-                                                        Comprar
-                                                    </a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -370,7 +296,7 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Grupo de Variação / SKU Associado</label>
+                        <label class="form-label">Grupo de Variação Associado</label>
                         <input type="text" class="form-control" id="editGrupoVariacaoAssociado" readonly>
                         <small class="form-text text-muted">Este campo não é editável, pois define a entrada de estoque
                             específica.</small>
@@ -451,8 +377,8 @@
                     const nomeProduto = event.target.dataset.nomeProduto;
                     const nomeGrupo = event.target.dataset.nomeGrupo;
                     let nomeCompleto = nomeProduto;
-                    if (nomeGrupo && nomeGrupo !== 'N/A (Sem SKU)') {
-                        nomeCompleto += ` (SKU: ${nomeGrupo})`;
+                    if (nomeGrupo && nomeGrupo !== 'N/A (Sem Variação)') {
+                        nomeCompleto += ` (Grupo: ${nomeGrupo})`;
                     }
                     document.getElementById('itemExcluirNome').textContent = `o produto "${nomeCompleto}"`;
                     modalConfirmacaoExclusao.show();
@@ -472,7 +398,7 @@
             document.getElementById('editNomeProduto').value = data.nomeProduto;
             document.getElementById('editPrecoProduto').value = parseFloat(data.preco);
             document.getElementById('editQuantidadeProduto').value = parseInt(data.quantidade);
-            document.getElementById('editGrupoVariacaoAssociado').value = data.nomeGrupo; // Exibe o nome do grupo/SKU
+            document.getElementById('editGrupoVariacaoAssociado').value = data.nomeGrupo; // Exibe o nome do grupo
 
             modalEditarProduto.show();
         }
@@ -483,16 +409,19 @@
         document.getElementById('btnSalvarEdicaoProduto').addEventListener('click', async function () {
             const produtoId = parseInt(document.getElementById('editProdutoId').value);
             const estoqueId = parseInt(document.getElementById('editEstoqueId').value);
+            // const grupoId = document.getElementById('editGrupoId').value === '' ? null : parseInt(document.getElementById('editGrupoId').value);
+
             const novoNomeProduto = document.getElementById('editNomeProduto').value.trim();
             const novoPreco = parseFloat(document.getElementById('editPrecoProduto').value);
             const novaQuantidade = parseInt(document.getElementById('editQuantidadeProduto').value);
-            const alertaProduto = document.getElementById('alertaProduto'); // Usar o alerta principal da tela
+            const alertaProduto = document.getElementById('alertaProduto');
 
             if (novoNomeProduto === '' || isNaN(novoPreco) || isNaN(novaQuantidade)) {
                 showAlert('Por favor, preencha todos os campos corretamente.', 'warning', alertaProduto);
                 return;
             }
 
+            // Atualiza produto e estoque
             try {
                 const response = await fetch('/index.php?page=produtos', {
                     method: 'PUT', // Usamos PUT para atualização
@@ -511,7 +440,7 @@
 
                 if (result.success) {
                     showAlert(result.message, 'success', alertaProduto);
-                    location.reload(); // Recarrega a página para atualizar a tabela
+                    location.reload(); // Recarrega a página para atualizar a tabela (simplificado por agora)
                 } else {
                     showAlert(result.message, 'danger', alertaProduto);
                 }
@@ -524,10 +453,16 @@
 
         /**
          * Confirma e executa a exclusão do produto/entrada de estoque selecionado.
+         * Nota: Excluir um produto aqui significa remover a entrada de estoque associada.
+         * Se um produto tiver múltiplas entradas de estoque (para diferentes grupos),
+         * esta função excluirá apenas a entrada de estoque da linha clicada.
+         * Para remover o produto completamente, todas as suas entradas de estoque devem ser removidas.
          */
         document.getElementById('btnConfirmarExclusao').addEventListener('click', async function () {
             if (itemExcluirTipo === 'produto') {
-                const alertaProduto = document.getElementById('alertaProduto'); // Usar o alerta principal da tela
+                const alertaProduto = document.getElementById('alertaProduto');
+
+                // Remove a entrada de estoque específica
                 try {
                     const response = await fetch('/index.php?page=produtos', {
                         method: 'DELETE', // Usamos DELETE para exclusão
@@ -557,9 +492,11 @@
             itemExcluirEstoqueId = null;
         });
 
-        // --- Event Listener de Cadastro de NOVO Produto ---
+        // --- Event Listener de Cadastro ---
+
+        // Formulário de Cadastro de Produto
         document.getElementById('formCadastrarProduto').addEventListener('submit', async function (event) {
-            event.preventDefault();
+            event.preventDefault(); // Evita o recarregamento da página
             const nomeProdutoInput = document.getElementById('nomeProduto');
             const precoProdutoInput = document.getElementById('precoProduto');
             const quantidadeProdutoInput = document.getElementById('quantidadeProduto');
@@ -576,6 +513,7 @@
                 return;
             }
 
+            // Cadastra estoque para este produto e grupo
             try {
                 const response = await fetch('/index.php?page=produtos', {
                     method: 'POST',
@@ -586,8 +524,7 @@
                         nome: nome,
                         preco: preco,
                         quantidade: quantidade,
-                        grupo_id: grupoId,
-                        // Não envia produto_id, indicando que é um novo produto
+                        grupo_id: grupoId
                     })
                 });
                 const result = await response.json();
@@ -597,7 +534,7 @@
                     nomeProdutoInput.value = '';
                     precoProdutoInput.value = '';
                     quantidadeProdutoInput.value = '';
-                    grupoVariacaoProdutoSelect.value = '';
+                    grupoVariacaoProdutoSelect.value = ''; // Reseta a seleção
                     location.reload(); // Recarrega a página para atualizar a tabela
                 } else {
                     showAlert(result.message, 'danger', alertaProduto);
@@ -608,68 +545,9 @@
             }
         });
 
-        // --- Event Listener de Adicionar Estoque para Produto EXISTENTE ---
-        document.getElementById('formAdicionarEstoque').addEventListener('submit', async function (event) {
-            event.preventDefault();
-            const selectProdutoExistente = document.getElementById('selectProdutoExistente');
-            const selectGrupoVariacaoEstoque = document.getElementById('selectGrupoVariacaoEstoque');
-            const precoEstoqueExistente = document.getElementById('precoEstoqueExistente');
-            const quantidadeEstoqueExistente = document.getElementById('quantidadeEstoqueExistente');
-            const alertaAdicionarEstoque = document.getElementById('alertaAdicionarEstoque'); // Alerta específico para este formulário
-
-            const produtoId = selectProdutoExistente.value === '' ? null : parseInt(selectProdutoExistente.value);
-            const grupoId = selectGrupoVariacaoEstoque.value === '' ? null : parseInt(selectGrupoVariacaoEstoque.value);
-            const preco = parseFloat(precoEstoqueExistente.value);
-            const quantidade = parseInt(quantidadeEstoqueExistente.value);
-
-            if (produtoId === null || isNaN(preco) || isNaN(quantidade)) {
-                showAlert('Por favor, selecione um produto e preencha preço/quantidade corretamente.', 'warning', alertaAdicionarEstoque);
-                return;
-            }
-
-            // O grupoId pode ser null se o SKU for "Nenhum"
-            if (grupoId === null && selectGrupoVariacaoEstoque.value !== '') {
-                showAlert('Por favor, selecione um SKU válido ou "Nenhum".', 'warning', alertaAdicionarEstoque);
-                return;
-            }
-
-
-            try {
-                const response = await fetch('/index.php?page=estoque', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        produto_id: produtoId, // Envia o ID do produto existente
-                        grupo_id: grupoId, // Envia o ID do grupo de variação (SKU)
-                        preco: preco,
-                        quantidade: quantidade
-                        // Não envia 'nome', indicando que não é um novo produto
-                    })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    showAlert(result.message, 'success', alertaAdicionarEstoque);
-                    selectProdutoExistente.value = '';
-                    selectGrupoVariacaoEstoque.value = '';
-                    precoEstoqueExistente.value = '';
-                    quantidadeEstoqueExistente.value = '';
-                    location.reload(); // Recarrega a página para atualizar a tabela
-                } else {
-                    showAlert(result.message, 'danger', alertaAdicionarEstoque);
-                }
-            } catch (error) {
-                console.error('Erro ao adicionar estoque:', error);
-                showAlert('Erro ao conectar com o servidor.', 'danger', alertaAdicionarEstoque);
-            }
-        });
-
-
         // --- Inicialização ---
         document.addEventListener('DOMContentLoaded', () => {
-            adicionarListenersAcoesProduto(); // Adiciona listeners aos botões de ação da tabela
+            adicionarListenersAcoesProduto();
         });
     </script>
 </body>

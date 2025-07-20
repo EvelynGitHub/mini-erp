@@ -12,11 +12,11 @@ class PedidoItem
         $this->pdo = $pdo;
     }
 
-    public function adicionarItem(int $pedidoId, int $produtoId, int $quantidade, float $preco): bool
+    public function adicionarItem(int $pedidoId, int $produtoId, int $grupoId, int $quantidade, float $preco): bool
     {
-        $stmt = $this->pdo->prepare("INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco_unitario) 
-                                     VALUES (?, ?, ?, ?)");
-        return $stmt->execute([$pedidoId, $produtoId, $quantidade, $preco]);
+        $stmt = $this->pdo->prepare("INSERT INTO pedido_itens (pedido_id, produto_id, grupo_id, quantidade, preco_unitario) 
+                                     VALUES (?, ?, ?, ?, ?)");
+        return $stmt->execute([$pedidoId, $produtoId, $grupoId, $quantidade, $preco]);
     }
 
     public function listarPorPedido(int $pedidoId): array
