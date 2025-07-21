@@ -17,7 +17,7 @@
 <body class="">
     <!-- Menu de Navegação -->
     <nav class="navbar navbar-expand-lg navbar-dark mb-5">
-        <div class="container-fluid">
+        <div class="container-md ">
             <a class="navbar-brand" href="index.php">Mini-ERP</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -25,7 +25,10 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav justify-content-end ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="index.php">Produtos</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="?page=variacao">Variações</a>
                     </li>
