@@ -23,7 +23,15 @@ class VariacaoController
     {
         $variacoes = $this->variacaoModel->getAllVariacoes();
         $gruposVariacoes = $this->variacaoModel->getAllGruposVariacoes();
-        include __DIR__ . '/../Views/variacoes.php';
+
+        renderizarView(
+            __DIR__ . '/../Views/variacoes.php',
+            null,
+            [
+                'variacoes' => $variacoes,
+                'gruposVariacoes' => $gruposVariacoes,
+            ]
+        );
     }
 
     /**

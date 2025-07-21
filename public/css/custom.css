@@ -1,0 +1,138 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    /* Um cinza claro para o fundo */
+    color: #333;
+}
+
+.navbar {
+    background-color: #007bff;
+    /* Azul primário do Bootstrap */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    color: #fff !important;
+}
+
+.card {
+    border-radius: 1rem;
+    /* Cantos mais arredondados */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+    /* Sombra mais suave */
+    border: none;
+    /* Remove a borda padrão do card */
+}
+
+.card-header {
+    background-color: #ffffff;
+    /* Fundo branco para o cabeçalho do card */
+    border-bottom: 1px solid #e9ecef;
+    padding: 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-2px);
+    /* Efeito de elevação ao passar o mouse */
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+    background-color: #117a8b;
+    border-color: #117a8b;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #bd2130;
+    border-color: #bd2130;
+    transform: translateY(-1px);
+}
+
+.form-control,
+.form-select {
+    border-radius: 0.5rem;
+    border: 1px solid #ced4da;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+.alert {
+    border-radius: 0.75rem;
+    margin-top: 1.5rem;
+    font-weight: 500;
+}
+
+.table {
+    border-radius: 1rem;
+    overflow: hidden;
+    /* Garante que os cantos arredondados funcionem com a tabela */
+}
+
+.table thead th {
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table td,
+.table th {
+    padding: 1rem;
+}
+
+.modal-content {
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .15);
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+}
+
+.modal-footer {
+    border-top: none;
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+}

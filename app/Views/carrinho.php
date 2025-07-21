@@ -1,13 +1,45 @@
-<!DOCTYPE html>
-<html>
+<?php
 
-<head>
-    <meta charset="utf-8">
-    <title>Carrinho</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+$PAGE_TITLE = "Seu Carrinho de Compras";
 
-<body class="container mt-4">
+$PAGE_CSS = <<<HTML
+    <link rel="stylesheet" href="/css/custom.css">
+
+    <style>
+        /* Exemplo: Ajustes para a tabela do carrinho */
+        .table-bordered th, .table-bordered td {
+            vertical-align: middle;
+        }
+        .form-control {
+            border-radius: 0.5rem;
+        }
+        .input-group label {
+            width: 100%; /* Garante que a label ocupe a largura total acima do input */
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .input-group .form-control {
+            border-top-left-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
+        }
+        .input-group .btn {
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+    </style>
+HTML;
+
+$PAGE_SCRIPTS = <<<HTML
+    <script>
+        const subtotal = {$subtotal};
+        const frete = {$frete};
+    </script>
+    <script src="/js/carrinho.js"></script>
+HTML;
+
+?>
+
+<div class="container mt-4">
     <h1>Seu Carrinho</h1>
 
     <?php if (empty($carrinho)): ?>
@@ -39,7 +71,7 @@
                             <?php endif; ?>
                         </td>
                         <td>
-                            <a href="/index.php?page=carrinho&action=remove&id=<?= $item['produto_id'] ?>&variacao=<?= $item['variacao_id'] ?>"
+                            <a href="/index.php?page=carrinho&action=remove&id=<?= $item['produto_id'] ?>&variacao=<?= $item['variacao_id'] ?? '' ?>"
                                 class="btn btn-danger btn-sm">Remover</a>
                         </td>
                     </tr>
@@ -58,31 +90,31 @@
         <?php else: ?>
             <form method="post" action="/index.php?page=carrinho&action=checkout">
                 <div class="mb-3">
-                    <label>Email para contato</label>
-                    <input type="email" name="email" class="form-control" required>
+                    <label for="emailContato" class="form-label">Email para contato</label>
+                    <input type="email" name="email" id="emailContato" class="form-control" required>
                 </div>
-                <div class="input-group mb-3">
-                    <label>CEP</label>
-                    <div class="input-group mb-3">
-                        <input name="cep" id="cep" class="form-control" aria-describedby="btnCep">
-                        <button id="btnCep" class="btn btn-success btn-sm" type="button">Pesquisar</button>
+                <div class="mb-3">
+                    <label for="cep" class="form-label">CEP</label>
+                    <div class="input-group">
+                        <input name="cep" id="cep" class="form-control" placeholder="Ex: 00000-000" aria-describedby="btnCep">
+                        <button id="btnCep" class="btn btn-primary" type="button">Pesquisar</button>
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label>Endereço de entrega</label>
-                    <textarea name="endereco" id="endereco" class="form-control" required></textarea>
+                    <label for="endereco" class="form-label">Endereço de entrega</label>
+                    <textarea name="endereco" id="endereco" class="form-control" rows="3" required></textarea>
                 </div>
                 <h4>Aplicar Cupom</h4>
                 <div class="input-group mb-3">
-                    <input type="text" id="codigoCupom" name="cupom" placeholder="Digite o código" class="form-control"
+                    <input type="text" id="codigoCupom" name="cupom" placeholder="Digite o código do cupom" class="form-control"
                         aria-describedby="btnCupom">
-                    <button id="btnCupom" class="btn btn-success btn-sm" type="button">Aplicar</button>
+                    <button id="btnCupom" class="btn btn-primary" type="button">Aplicar</button>
                 </div>
                 <p id="msgCupom" style="color: red;"></p>
 
 
-                <div class="input-group mb-3">
-                    <button class="btn btn-success">Finalizar Compra</button>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-success w-100">Finalizar Compra</button>
                 </div>
 
             </form>
@@ -91,45 +123,4 @@
     <?php endif; ?>
 
     <a href="/index.php?page=produtos" class="btn btn-secondary mt-3">Continuar Comprando</a>
-
-    <script src="../js/jquery.min.js"></script>
-    <script>
-        // Aplicar Cupom
-        $("#btnCupom").on('click', function () {
-
-            const codigo = $("#codigoCupom").val();
-            const subtotal = <?= $subtotal ?>;
-            $.post('/index.php?page=aplicar-cupom', { codigo, subtotal }, function (res) {
-                const data = res;
-                if (data.valido) {
-                    const desconto = data.desconto;
-                    const novoTotal = <?= $subtotal ?> + <?= $frete ?> - desconto;
-                    $("#total").text("Total: R$" + novoTotal.toFixed(2).replace('.', ','));
-                    $("#msgCupom").css("color", "green").text("Cupom aplicado! Desconto: R$" + desconto.toFixed(2));
-                } else {
-                    $("#msgCupom").css("color", "red").text(data.msg);
-                }
-            });
-        });
-
-        // Consulta CEP com ViaCEP
-        // $("#cep").on('blur', function () {
-        //      const cep = $(this).val().replace(/\D/g, '');
-        $("#btnCep").on('click', function () {
-            const cep = $("#cep").val().replace(/\D/g, '');
-            if (cep.length === 8) {
-                $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function (data) {
-                    if (!data.erro) {
-                        console.log(data);
-
-                        $("#endereco").val(`${data.logradouro}, nº , ${data.bairro}, ${data.localidade}-${data.uf}`);
-                    } else {
-                        alert("CEP não encontrado.");
-                    }
-                });
-            }
-        });
-    </script>
-</body>
-
-</html>
+</div>

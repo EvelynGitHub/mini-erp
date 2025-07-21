@@ -125,7 +125,15 @@ class PedidoController
             }
         }
 
-        include __DIR__ . '/../Views/carrinho.php';
+        renderizarView(__DIR__ . '/../Views/carrinho.php', null, [
+            'carrinho' => $carrinho,
+            'subtotal' => $subtotal,
+            'frete' => $frete,
+            'total' => $total,
+            'errosEstoque' => $errosEstoque
+        ]);
+
+        // include __DIR__ . '/../Views/carrinho.php';
     }
 
     /**
@@ -205,8 +213,16 @@ class PedidoController
 
     public function listarPedidos(?string $msg = ""): void
     {
+
         $pedidos = $this->pedidoModel->listar();
-        include __DIR__ . '/../Views/pedidos.php';
+
+        renderizarView(__DIR__ . '/../Views/pedidos.php', null, [
+            'pedidos' => $pedidos,
+            'msg' => $msg
+        ]);
+
+        // $pedidos = $this->pedidoModel->listar();
+        // include __DIR__ . '/../Views/pedidos.php';
     }
 
     /**

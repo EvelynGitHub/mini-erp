@@ -38,7 +38,15 @@ class ProdutoController
 
         $produtosSimples = array_values($produtosSimples);
 
-        include __DIR__ . '/../Views/produtos.php';
+        renderizarView(
+            __DIR__ . '/../Views/produtos.php',
+            null,
+            [
+                'produtos' => $produtos,
+                'gruposVariacoes' => $gruposVariacoes,
+                'produtosSimples' => $produtosSimples
+            ]
+        );
     }
 
     /**
