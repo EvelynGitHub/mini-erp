@@ -28,7 +28,7 @@ if ($method != 'GET') {
     header('Content-Type: application/json');
 }
 
-$bodyHttpInput = json_decode(file_get_contents('php://input'), true);
+$bodyHttpInput = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
 switch ($page) {
     case 'produtos':
@@ -47,15 +47,24 @@ switch ($page) {
     case 'carrinho':
         $controller = new PedidoController($pdo);
         $action = $_GET['action'] ?? null;
-        if ($action === 'add' && isset($_GET['id']) && isset($_GET['variacao'])) {
-            $controller->add($_GET['id'], $_GET['variacao'], 1);
-        } else if ($action === 'remove' && isset($_GET['id']) && isset($_GET['variacao'])) {
-            $controller->remove($_GET['id'], $_GET['variacao']);
+        $variacao = !empty($_GET['variacao']) ? $_GET['variacao'] : null;
+
+        if ($action === 'add' && isset($_GET['id'])) {
+            $controller->add($_GET['id'], $variacao, 1);
+        } else if ($action === 'remove' && isset($_GET['id'])) {
+            $controller->remove($_GET['id'], $variacao);
         } else if ($action === 'checkout') {
-            $controller->checkout();
+            $controller->checkout($bodyHttpInput);
+        } else if ($action === 'pedidos') {
+            $controller->listarPedidos();
         } else {
             $controller->carrinho();
         }
+        break;
+
+    case 'pedidos':
+        $controller = new PedidoController($pdo);
+        $controller->listarPedidos($_GET['msg'] ?? null);
         break;
 
     case 'aplicar-cupom':

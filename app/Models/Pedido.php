@@ -39,4 +39,10 @@ class Pedido
         $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
         return $pedido ?: null;
     }
+
+    public function listar(): array
+    {
+        $sql = "SELECT id, total, status, cliente_endereco as endereco, created_at as criado_em FROM pedidos ORDER BY created_at DESC";
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\Cupom;
 use App\Models\Pedido;
 use App\Models\PedidoItem;
 use App\Models\Estoque;
@@ -18,6 +19,7 @@ class PedidoController
     protected PedidoItem $pedidoItemModel;
     protected Estoque $estoqueModel;
     protected Produto $produtoModel;
+    protected Cupom $cupomModel;
 
     public function __construct(PDO $pdo)
     {
@@ -26,6 +28,7 @@ class PedidoController
         $this->pedidoItemModel = new PedidoItem($pdo);
         $this->estoqueModel = new Estoque($pdo);
         $this->produtoModel = new Produto($pdo);
+        $this->cupomModel = new Cupom($pdo);
 
         if (!isset($_SESSION['carrinho'])) {
             $_SESSION['carrinho'] = [];
@@ -35,7 +38,7 @@ class PedidoController
     /**
      * Adiciona produto ao carrinho
      */
-    public function add(int $produtoId, int $variacaoId, int $quantidade = 1): void
+    public function add(int $produtoId, ?int $variacaoId, int $quantidade = 1): void
     {
         $produto = $this->produtoModel->find($produtoId);
         if (!$produto) {
@@ -71,7 +74,7 @@ class PedidoController
     /**
      * Remoove produto do carrinho
      */
-    public function remove(int $produtoId, int $variacaoId): void
+    public function remove(int $produtoId, ?int $variacaoId): void
     {
         $produto = $this->produtoModel->find($produtoId);
         if (!$produto) {
@@ -79,7 +82,11 @@ class PedidoController
             return;
         }
 
-        unset($_SESSION['carrinho']["$produtoId+$variacaoId"]);
+        if ($_SESSION['carrinho']["$produtoId+$variacaoId"]['quantidade'] > 0) {
+            $_SESSION['carrinho']["$produtoId+$variacaoId"]['quantidade'] -= 1;
+        } else {
+            unset($_SESSION['carrinho']["$produtoId+$variacaoId"]);
+        }
 
         header("Location: /index.php?page=carrinho");
         exit;
@@ -101,12 +108,20 @@ class PedidoController
         // Valida estoque (alerta visual apenas)
         $errosEstoque = [];
         foreach ($carrinho as $p_id_va => $item) {
-            $stmt = $this->pdo->prepare("SELECT quantidade FROM estoque WHERE produto_id = ? AND grupo_id = ?");
-            $stmt->execute([$item['produto_id'], $item['variacao_id']]);
+            if (is_null($item['variacao_id'])) {
+                $stmt = $this->pdo->prepare("SELECT quantidade FROM estoque WHERE produto_id = ? AND grupo_id IS NULL");
+                $stmt->execute([$item['produto_id']]);
+            } else {
+                $stmt = $this->pdo->prepare("SELECT quantidade FROM estoque WHERE produto_id = ? AND grupo_id = ?");
+                $stmt->execute([$item['produto_id'], $item['variacao_id']]);
+            }
+
             $qtdEstoque = (int) $stmt->fetchColumn();
 
+            $chave = "{$item['produto_id']}+{$item['variacao_id']}";
+
             if ($qtdEstoque < $item['quantidade']) {
-                $errosEstoque[$item['produto_id']][$item['variacao_id']] = "Estoque insuficiente (Disponível: {$qtdEstoque})";
+                $errosEstoque[$chave] = "Estoque insuficiente (Disponível: {$qtdEstoque})";
             }
         }
 
@@ -116,7 +131,7 @@ class PedidoController
     /**
      * Finaliza a compra
      */
-    public function checkout(): void
+    public function checkout(array $input): void
     {
         $carrinho = $_SESSION['carrinho'] ?? [];
         if (empty($carrinho)) {
@@ -125,19 +140,30 @@ class PedidoController
         }
 
         // Valida estoque de todos os itens antes de processar
+        $subtotal = 0;
         foreach ($carrinho as $p_id_va => $item) {
             $qtdEstoque = $this->estoqueModel->getQuantidadePreco($item['produto_id'], $item['variacao_id']);
-            if ($qtdEstoque < $item['quantidade']) {
-                echo "Estoque insuficiente para o produto: {$item['nome']} (Disponível: $qtdEstoque)";
+            if ($qtdEstoque['quantidade'] < $item['quantidade']) {
+                echo "Estoque insuficiente para o produto: {$item['nome']} (Disponível: {$qtdEstoque['quantidade']})";
                 return;
+            }
+            $subtotal += $qtdEstoque['preco'] * $item['quantidade'];
+        }
+
+        // // Calcula valores
+        // foreach ($carrinho as $item) {
+        // }
+
+        // Aplica cupom se existir
+        $cupom = $input['cupom'] ?? null;
+        if ($cupom) {
+            $desconto = $this->cupomModel->validar($cupom, $subtotal);
+
+            if ($desconto['valido']) {
+                $subtotal -= $desconto['desconto'];
             }
         }
 
-        // Calcula valores
-        $subtotal = 0;
-        foreach ($carrinho as $item) {
-            $subtotal += $item['preco'] * $item['quantidade'];
-        }
         $frete = $this->calcularFrete($subtotal);
         $total = $subtotal + $frete;
 
@@ -146,8 +172,8 @@ class PedidoController
             $subtotal,
             $frete,
             $total,
-            $_POST['email'] ?? 'teste@teste.com',
-            $_POST['endereco'] ?? 'Endereço não informado'
+            $input['email'] ?? 'teste@teste.com',
+            $input['endereco'] ?? 'Endereço não informado'
         );
 
         // Salva itens e decrementa estoque
@@ -167,12 +193,20 @@ class PedidoController
         }
 
         // Dispara e-mail em background
-        $this->enviarEmailAsync($pedidoId, $_POST['email'] ?? 'teste@teste.com', $_POST['endereco'] ?? '', $total);
+        $this->enviarEmailAsync($pedidoId, $input['email'] ?? 'teste@teste.com', $input['endereco'] ?? '', $total);
 
         // Limpa carrinho
         $_SESSION['carrinho'] = [];
 
-        echo "Pedido #$pedidoId finalizado com sucesso!";
+        $msg = "Pedido #$pedidoId finalizado com sucesso!";
+        header("Location: /index.php?page=pedidos&msg=" . urlencode($msg));
+    }
+
+
+    public function listarPedidos(?string $msg = ""): void
+    {
+        $pedidos = $this->pedidoModel->listar();
+        include __DIR__ . '/../Views/pedidos.php';
     }
 
     /**

@@ -64,16 +64,26 @@ class Estoque
         }
     }
 
-    public function decrementar(int $produtoId, int $grupoId, int $quantidade): bool
+    public function decrementar(int $produtoId, ?int $grupoId, int $quantidade): bool
     {
-        $stmt = $this->pdo->prepare("UPDATE estoque SET quantidade = quantidade - ? WHERE produto_id = ? AND grupo_id = ?");
+        if (is_null($grupoId)) {
+            $stmt = $this->pdo->prepare("UPDATE estoque SET quantidade = (quantidade - ?) WHERE produto_id = ? AND grupo_id IS NULL");
+            return $stmt->execute([$quantidade, $produtoId]);
+        }
+
+        $stmt = $this->pdo->prepare("UPDATE estoque SET quantidade = (quantidade - ?) WHERE produto_id = ? AND grupo_id = ?");
         return $stmt->execute([$quantidade, $produtoId, $grupoId]);
     }
 
-    public function getQuantidadePreco(int $produtoId, int $grupoId): array
+    public function getQuantidadePreco(int $produtoId, ?int $grupoId): array
     {
-        $stmt = $this->pdo->prepare("SELECT quantidade, preco FROM estoque WHERE produto_id = ? AND grupo_id = ?");
-        $stmt->execute([$produtoId, $grupoId]);
+        if (is_null($grupoId)) {
+            $stmt = $this->pdo->prepare("SELECT quantidade, preco FROM estoque WHERE produto_id = ? AND grupo_id IS NULL");
+            $stmt->execute([$produtoId]);
+        } else {
+            $stmt = $this->pdo->prepare("SELECT quantidade, preco FROM estoque WHERE produto_id = ? AND grupo_id = ?");
+            $stmt->execute([$produtoId, $grupoId]);
+        }
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: ['quantidade' => 0, 'preco' => 0.0];
     }
 

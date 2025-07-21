@@ -49,7 +49,7 @@
 
         <h4>Subtotal: R$ <?= number_format($subtotal, 2, ',', '.') ?></h4>
         <h4>Frete: R$ <?= number_format($frete, 2, ',', '.') ?></h4>
-        <h3>Total: R$ <?= number_format($total, 2, ',', '.') ?></h3>
+        <h3 id="total">Total: R$ <?= number_format($total, 2, ',', '.') ?></h3>
 
         <?php if (!empty($errosEstoque)): ?>
             <div class="alert alert-danger">
@@ -74,7 +74,7 @@
                 </div>
                 <h4>Aplicar Cupom</h4>
                 <div class="input-group mb-3">
-                    <input type="text" id="codigoCupom" placeholder="Digite o código" class="form-control"
+                    <input type="text" id="codigoCupom" name="cupom" placeholder="Digite o código" class="form-control"
                         aria-describedby="btnCupom">
                     <button id="btnCupom" class="btn btn-success btn-sm" type="button">Aplicar</button>
                 </div>
@@ -100,11 +100,11 @@
             const codigo = $("#codigoCupom").val();
             const subtotal = <?= $subtotal ?>;
             $.post('/index.php?page=aplicar-cupom', { codigo, subtotal }, function (res) {
-                const data = JSON.parse(res);
-                if (data.success) {
+                const data = res;
+                if (data.valido) {
                     const desconto = data.desconto;
                     const novoTotal = <?= $subtotal ?> + <?= $frete ?> - desconto;
-                    $("#total").text("R$" + novoTotal.toFixed(2).replace('.', ','));
+                    $("#total").text("Total: R$" + novoTotal.toFixed(2).replace('.', ','));
                     $("#msgCupom").css("color", "green").text("Cupom aplicado! Desconto: R$" + desconto.toFixed(2));
                 } else {
                     $("#msgCupom").css("color", "red").text(data.msg);

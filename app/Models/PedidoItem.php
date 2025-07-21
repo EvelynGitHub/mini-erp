@@ -12,7 +12,7 @@ class PedidoItem
         $this->pdo = $pdo;
     }
 
-    public function adicionarItem(int $pedidoId, int $produtoId, int $grupoId, int $quantidade, float $preco): bool
+    public function adicionarItem(int $pedidoId, int $produtoId, ?int $grupoId, int $quantidade, float $preco): bool
     {
         $stmt = $this->pdo->prepare("INSERT INTO pedido_itens (pedido_id, produto_id, grupo_id, quantidade, preco_unitario) 
                                      VALUES (?, ?, ?, ?, ?)");

@@ -26,9 +26,10 @@ class EmailService
         file_put_contents('php://stderr', "[EmailService] Iniciado envio de email: {$email}" . PHP_EOL);
 
         // Busca os itens do pedido
-        $sql = "SELECT p.nome, i.quantidade, i.preco_unitario
+        $sql = "SELECT p.nome, i.quantidade, i.preco_unitario, gv.nome as grupo
                 FROM pedido_itens i
                 JOIN produtos p ON p.id = i.produto_id
+                LEFT JOIN grupos_variacoes gv ON gv.id = i.grupo_id
                 WHERE i.pedido_id = ?";
 
         $stmt = $this->pdo->prepare($sql);
@@ -39,10 +40,11 @@ class EmailService
         $listaProdutos = "<ul>";
         foreach ($itens as $item) {
             $nome = htmlspecialchars($item['nome']);
+            $grupo = htmlspecialchars($item['grupo']);
             $qtd = (int) $item['quantidade'];
             $preco = number_format($item['preco_unitario'], 2, ',', '.');
 
-            $listaProdutos .= "<li>{$nome} - {$qtd}x (R\${$preco} cada)</li>";
+            $listaProdutos .= "<li>{$nome} - {$grupo} - {$qtd}x (R\${$preco} cada)</li>";
         }
         $listaProdutos .= "</ul>";
 
@@ -60,6 +62,7 @@ class EmailService
             $mail->setFrom('loja@teste.com', 'Mini ERP');
             $mail->addAddress($email);
             $mail->isHTML(true);
+            $mail->CharSet = 'UTF-8';
             $mail->Subject = "Confirmação do Pedido #$pedidoId";
             $mail->Body = "Olá! Seu pedido foi realizado com sucesso.<br><br>
                            <strong>Itens:</strong> {$listaProdutos}

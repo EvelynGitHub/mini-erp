@@ -167,10 +167,13 @@
                         <a class="nav-link" aria-current="page" href="?page=variacao">Variações</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="?page=pedidos">Pedidos</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="?page=carrinho">
                             Carrinho
                             <span class="badge rounded-pill bg-danger">
-                                <?= count($_SESSION["carrinho"]) ?>
+                                <?= count($_SESSION["carrinho"] ?? []) ?>
                             </span>
                         </a>
                     </li>
